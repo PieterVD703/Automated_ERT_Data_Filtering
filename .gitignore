@@ -1,0 +1,13 @@
+# Ignore all files inside the 'Figuren' directory
+libraries/Bach-proef/Figuren/*
+libraries/Bach-proef/Bach_Project_Files/*
+libraries/Bach-proef/data/*
+libraries/Bach-proef/Test.py
+.venv/
+
+
+# Except the .gitkeep file
+!libraries/Bach-proef/Figuren/.gitkeep
+!libraries/Bach-proef/data/.gitkeep
+
+

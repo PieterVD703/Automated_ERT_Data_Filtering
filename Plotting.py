@@ -45,7 +45,7 @@ class Plotting:
         else:
             self.index = index
 
-    def plot_moving_median(self, save=False):
+    def plot_moving_median(self, extension, save=False):
         """
         Een plot die het effect van de moving median aangeeft.
         :param index: de index van de meting waarop je de median wilt doen
@@ -69,25 +69,34 @@ class Plotting:
         plt.grid(True)
         plt.legend(['raw', 'filtered'])
         if save:
-            fname = os.path.join(PATH_TO_PLOT, "moving median plot" + str(index) + '.png')  # locatie en naam waar naartoe geschreven wordt
+            fname = os.path.join(PATH_TO_PLOT, "moving median plot" + str(filtering_instance.window) + str(index) + '.' + extension)  # locatie en naam waar naartoe geschreven wordt
             plt.savefig(fname, dpi=200)
         plt.show()
         plt.close()
 
-    def plot_butterworth(self, phase_shift = False, interpolation = False, save = False, moving_window = False):
-        dates = self.dates
-        index = self.index
+    def plot_butterworth(self, extension, phase_shift = False, interpolation = False, save = False, moving_window = False, residuals = False, compare = False):
+        dates, index = self.dates, self.index
         values = standardise(self.values, index)
+
         filtering_instance = Filtering(self.path_to_data, index)
         if moving_window:
             filtering_instance.values, _ = filtering_instance.moving_window()
+
         values_filtered, dates_filtered = filtering_instance.butterworth(phase_shift, interpolation)
 
-        #plotting
+        #plotsize kiezen
+        n_rows = 2 if residuals else 1
+        fig, axes = plt.subplots(n_rows, 1, figsize=(8, 4 if n_rows == 1 else 8))  # adjust size for subplots
+        if residuals:
+            ax1, ax2 = axes
+        else:
+            ax1 = axes
+
+
         params = BUTTERWORTH_PARAMS
         cutoff = params["cutoff"] / float(2) * params["fs"] * float(10 ** 6)  # terug omzetten van relatieve cutoff naar echte
-        plt.figure(figsize=(8, 6))  # Example: 12 inches wide, 6 inches high
-        """Titelgeving grafiek"""
+
+        #titelgeving grafiek
         suffix = ""
         if phase_shift:
             suffix += ", met faseverschuiving"
@@ -95,17 +104,62 @@ class Plotting:
             suffix += ", met moving window van {} dagen".format(WINDOW_LENGTH)
         if interpolation:
             suffix += ", met geïnterpoleerde waarden"
-        plt.title("Plot datapunt {} met butterworth filter cutoff frequentie {:.2f}μHz/periode {:.1f} dagen{}".format(str(index), cutoff, float(1)/(cutoff*10**(-6)*3600*24), suffix))
-        plt.plot(dates, values, "b--", linewidth=1, label="raw data")
-        plt.plot(dates_filtered, values_filtered, "r", linewidth=1, label="filtered data")
+        ax1.set_title("Plot datapunt {} met Butterworth filter".format(str(index), cutoff, float(1)/(cutoff*10**(-6)*3600*24), suffix))
+
+        # plotting
+        ax1.plot(dates, values, "b--", linewidth=1, label="raw data")
+        ax1.plot(dates_filtered, values_filtered, "r", linewidth=1, label="filtered data")
+        ax1.set_xlabel('Datum')
+        ax1.set_ylabel('Weerstand (Ω)')
+        ax1.set_xticks(dates_filtered[::50])
+        ax1.tick_params(axis='x', rotation=15)
+        ax1.grid('on')
+        legend_ax1 = [f"ruwe data", f"gefilterde data {params["days"]}d"]
+
         if not interpolation:
             empty_dates, empty_dates_values = plot_missing_values(values, index, filtering_instance)
-            plt.plot(empty_dates, empty_dates_values, marker="x", linestyle="", color="red", markersize=5)
-        plt.xlabel('Datum')
-        plt.ylabel('Weerstand (Ω)')
-        plt.xticks(rotation=15, ticks=dates_filtered[::50])
-        plt.grid('on')
-        plt.legend(['raw', 'gefilterd', 'lege punten'])
+            ax1.plot(empty_dates, empty_dates_values, marker="x", linestyle="", color="red", markersize=5)
+            legend_ax1.append("ontbrekende waarden")
+
+        if compare:
+            filtering_instance_compare = Filtering(self.path_to_data, index)
+            days_compare = 14  # Comparison filter length
+            assert days_compare > 2, "tijdseenheid niet boven Nyquist frequentie"
+            fs_compare = 1 / (3600 * 24)
+            cutoff_compare = 1 / (3600 * 24 * 2) * 2 / days_compare
+
+            compare_params = {
+                "days": days_compare,
+                "order": 2,
+                "fs": fs_compare,
+                "cutoff": cutoff_compare / (0.5 * fs_compare)
+            }
+            filtering_instance_compare.params = compare_params
+            filtering_instance_compare.values = standardise(self.values, index)
+
+            values_filtered_compared, dates_filtered_compared = filtering_instance_compare.butterworth(phase_shift, interpolation)
+            residual_values_compared = np.abs(values_filtered_compared - values[:len(values_filtered_compared)])
+
+            ax1.plot(dates_filtered_compared, values_filtered_compared, color="green")
+            legend_ax1.append(f"gefilterde data {days_compare}d")
+
+        if residuals:
+            residual_values = np.abs(values_filtered - values[:len(values_filtered)])
+            ax2 = fig.add_subplot(2, 1, 2)
+            ax2.scatter(dates_filtered, residual_values, color="red", s=1)
+            ax2.set_title("Residuen (|gefiltered - raw|)")
+            ax2.set_xlabel("Datum")
+            ax2.set_xticks(dates_filtered[::50])
+            ax2.set_ylabel("Restwaarde (Ω)")
+            legend_ax2 = [f"restwaarden {BUTTERWORTH_PARAMS["days"]}d"]
+            if compare:
+                ax2.scatter(dates_filtered_compared, residual_values_compared, s=1, color="green")
+                legend_ax2.append(f"restwaarden {days_compare}d")
+            ax2.legend(legend_ax2)
+            ax2.grid('on')
+
+        ax1.legend(legend_ax1)
+        plt.tight_layout()
 
         if save:
             #zodat men in de naam kan zien wat er allemaal is toegepast op de data
@@ -116,14 +170,16 @@ class Plotting:
                 suffix += "_mw{}".format(WINDOW_LENGTH)
             if phase_shift:
                 suffix += "_shifted"
+            if residuals:
+                suffix += "_res"
             fname = os.path.join(
                 PATH_TO_PLOT,
-                f"butterworth{index}{suffix}_{cutoff:.2f}μHz.png"
+                f"butterworth{index}{suffix}_{cutoff:.2f}μHz.{extension}"
             )
             # locatie en naam waar naartoe geschreven wordt
-            plt.savefig(fname, dpi=200)
+            fig.savefig(fname, dpi=200)
         plt.show()
-        plt.close()
+
 
 def butterworth_frequency_response(log=False, poles=False, save=False) -> np.ndarray:
     """
@@ -214,13 +270,16 @@ def butterworth_frequency_response(log=False, poles=False, save=False) -> np.nda
 
     return np.array([xf, yf])
 
+
+
+
 if __name__ == "__main__": #zal uitgevoerd worden indien het vanuit deze file gerund wordt
     start_time = time.time()
     plot_instance = Plotting(PATH_TO_DATA, 0)  # Create an instance of the class
-    #plot_instance.plot_moving_median(PATH_TO_PLOT)  # Call the method properly
+    #plot_instance.plot_moving_median(extension = "svg", save=True)  # Call the method properly
     #plot_instance.plot_butterworth(path_to_plot=PATH_TO_PLOT)  # Call the method properly
     print("--- %s seconds for data ---" % (time.time() - start_time))
-    plot_instance.plot_butterworth(phase_shift=False, moving_window=True, interpolation=False, save=True)
+    plot_instance.plot_butterworth(extension="svg", phase_shift=False, moving_window=True, interpolation=False, save=True, residuals=False, compare=True)
 
 
 

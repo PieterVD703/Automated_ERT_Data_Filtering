@@ -26,13 +26,14 @@ FILTERING
 """
 #moving median
 WINDOW_LENGTH: int = 3
-days = 7 #voor het gemak; hoeveel dagen de cutoff frequentie is, minimum 2!
+days = 3 #voor het gemak; hoeveel dagen de cutoff frequentie is, minimum 2!
 assert days > 2, "tijdseenheid niet boven Nyquist frequentie"
 cutoff = 1/(3600*24*2)*2/days  # desired cutoff frequency of the filter, Hz, smaller means more smoothing
 fs = 1 / (3600*24) # sampling frequency, Hz
 assert 0 < cutoff/(0.5*fs) <= 1, "invalid cutoff"
 #butterworth
 BUTTERWORTH_PARAMS = {
+    "days": days,
     "order": 2 ,
     "fs": fs,    # sample rate, Hz
     "cutoff": cutoff/(0.5*fs)  # desired cutoff frequency of the filter, Hz

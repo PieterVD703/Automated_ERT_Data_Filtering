@@ -19,7 +19,9 @@ class Filtering:
             self.index = [index]
         else:
             self.index = index
-
+        #voor vergelijkingen mogelijk te maken
+        self.params = BUTTERWORTH_PARAMS
+        self.window = WINDOW_LENGTH
     def moving_window(self):
         """
         moving window average eerst, grote gemiddeldes zouden interpolatie verstoren
@@ -29,7 +31,7 @@ class Filtering:
         :return:
         """
         data = self.values
-        window = WINDOW_LENGTH
+        window = self.window
         values_filtered = np.empty_like(data)
 
         for meas_id in range(len(self.index)):
@@ -75,7 +77,7 @@ class Filtering:
         """
         def butter_filter(values, phase_shift):
             """Filtering toepassen, voorwaarts of beide richtingen"""
-            params = BUTTERWORTH_PARAMS
+            params = self.params
             b, a = butter(N=params["order"], Wn=params["cutoff"], btype="low", analog=False)
             if phase_shift:
                 zi = lfilter_zi(b, a) * values[0]  # Herschalen naar eerste waarde van x
@@ -133,7 +135,7 @@ class Filtering:
         if export is True:
             fname = os.path.join(
                 path_to_plot,
-                f"butterworth{self.index}{suffix}.csv"
+                f"data{self.index}{suffix}.csv"
             )
             # locatie en naam waar naartoe geschreven wordt
             header = "Date," + ",".join(map(str, self.index))
@@ -146,10 +148,11 @@ class Filtering:
 
 if __name__ == "__main__":
     start_time = time.time()
-    filtering_instance = Filtering(PATH_TO_DATA, ange(0, 100))  # Create an instance
+    filtering_instance = Filtering(PATH_TO_DATA, 0)  # Create an instance
     #filtered_values, dates = filtering_instance.moving_window()
     #filtered_values, dates = filtering_instance.interpolate()
     #filtered_values, dates = filtering_instance.butterworth(phase_shift=False, interpolation=False)  # Call the method
     #np.savetxt("raw", filtered_values, delimiter=",")
-    filtering_instance.filteren(moving_window=True, interpolate=False, butterworth=True, export=False)
+    filtering_instance.filteren(moving_window=False, interpolate=False, butterworth=False, export=True)
     print("--- %s seconds for data ---" % (time.time() - start_time))
+

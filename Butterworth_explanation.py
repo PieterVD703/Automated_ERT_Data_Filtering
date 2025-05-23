@@ -169,3 +169,34 @@ def pole_zero_plot(save=False):
         fname = os.path.join(PATH_TO_PLOT, "pole_plot" + f"_ord{params["order"]}" '.png')
         plt.savefig(fname, dpi=300)
     plt.show()
+
+    def ERT_plot():
+        """
+        equipotentiaallijnen voor ERT plot
+        :return:
+        """
+        # ladingen
+        q = 1.0
+        pos_charge = (-1, 0)
+        neg_charge = (1, 0)
+
+        # grid
+        x = np.linspace(-3, 3, 400)
+        y = np.linspace(-3, 3, 400)
+        X, Y = np.meshgrid(x, y)
+
+        # afstand tot lading
+        r_pos = np.sqrt((X - pos_charge[0]) ** 2 + (Y - pos_charge[1]) ** 2)
+        r_neg = np.sqrt((X - neg_charge[0]) ** 2 + (Y - neg_charge[1]) ** 2)
+
+        # potentiaalveld
+        V = q / r_pos - q / r_neg
+
+        # equipotentiaalvelden
+        plt.figure(figsize=(36, 36))
+        contours = plt.contour(X, Y, V, levels=np.linspace(-10, 10, 40), colors='black', linewidths=0.5)
+        plt.axis('off')  # Hide axes for clean drawing
+        plt.gca().set_aspect('equal')
+        plt.tight_layout()
+        plt.savefig("equipotentials.svg", transparent=True)
+        plt.show()

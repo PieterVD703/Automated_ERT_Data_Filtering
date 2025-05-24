@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import butter, buttord
 import os
+
+from libraries.Automated_ERT_Data_Filtering.Plotting import butterworth_frequency_response
 from settings.config import PATH_TO_PLOT, BUTTERWORTH_PARAMS
 from matplotlib.patches import Circle
-
-
+from Help.Helper_functions import export
 
 def butterworth(save=False):
     """
@@ -15,7 +16,7 @@ def butterworth(save=False):
     """
     t = np.linspace(0, 1, 1000, False)  # 1 second
     sig = np.sin(2*np.pi*10*t) + np.sin(2*np.pi*20*t) #2 signalen, 1 van 10 en 20Hz genereren.
-    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(14, 8))
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8, 5))
     ax1.plot(t, sig)
     ax1.set_title('10Hz en 20Hz sinussen')
     ax1.axis([0, 1, -2, 2])
@@ -23,6 +24,7 @@ def butterworth(save=False):
     b, a = butter(params["order"], 15, fs=1000, btype="low", analog=False)
     sig10 = np.sin(2*np.pi*10*t)
     filtered = signal.filtfilt(b, a, sig)
+    #plotten en opmaak
     ax2.plot(t, filtered)
     ax2.plot(t, sig10, "g--", label="10Hz")
     ax2.set_title('Na 15Hz low-pass filter')
@@ -31,7 +33,7 @@ def butterworth(save=False):
     ax2.legend()
     plt.tight_layout()
     if save:
-        plt.savefig("filtering_illustrative.png")
+        export("filtering_illustrative")
     plt.show()
 
 def aliasing(save=False):
@@ -47,10 +49,11 @@ def aliasing(save=False):
     sig1 = np.sin(2 * np.pi * 17.3*10**(-6) * t1) #16u
     sig2 = np.sin(2 * np.pi * 17.3*10**(-6) * t2)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(14, 8)) #combineert beide figuren ineen
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(8, 5)) #combineert beide figuren ineen
     ax1.plot(t1, sig1, "g--",label="Fysisch proces (17.3 µHz, 1/16u)")
     ax1.plot(t2, sig2, "o", label="Gemeten signaal (11.6 µHz, 1/24u)")
     ax1.legend()
+    ax1.legend(loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3, fancybox=True, shadow=True)
     ax1.set_title("Signaal met periode 16u, meting elke 24u")
 
 
@@ -58,11 +61,10 @@ def aliasing(save=False):
     ax2.plot(t2, sig2, 'r--', linewidth=1, alpha=0.6)  # Connect them
     ax2.set_title('Bekomen signaal')
     ax2.legend()
+    ax2.legend(loc="lower center", bbox_to_anchor=(0.5, -0.4), ncol=3, fancybox=True, shadow=True)
     if save:
-        fname = os.path.join(PATH_TO_PLOT, "aliasing_example" + '.png')  # locatie en naam waar naartoe geschreven wordt
-        plt.savefig(fname, dpi=200)
-    plt.show()
-
+        export("aliasing")
+    plt.tight_layout()
 
 def density_plot_digital(save=False):
     """
@@ -128,8 +130,7 @@ def density_plot_digital(save=False):
     ax.set_title('Log-grootte magnitude respons van een {}e orde butterworth filter met cutoff frequentie {:.2f}μHz'.format(params["order"], cutoff))
     plt.tight_layout()
     if save:
-        fname = os.path.join(PATH_TO_PLOT, "density_plot_with_bode" + f"_ord{params["order"]}" '.png')
-        plt.savefig(fname, dpi=300)
+        export("density_plot_with_bode" + f"_ord{params["order"]}")
     plt.show()
 
 def pole_zero_plot(save=False):
@@ -166,11 +167,10 @@ def pole_zero_plot(save=False):
 
     plt.legend()
     if save:
-        fname = os.path.join(PATH_TO_PLOT, "pole_plot" + f"_ord{params["order"]}" '.png')
-        plt.savefig(fname, dpi=300)
+        export("pole_plot" + f"_ord{params["order"]}")
     plt.show()
 
-    def ERT_plot():
+    def ERT_plot(save=False):
         """
         equipotentiaallijnen voor ERT plot
         :return:
@@ -198,5 +198,6 @@ def pole_zero_plot(save=False):
         plt.axis('off')  # Hide axes for clean drawing
         plt.gca().set_aspect('equal')
         plt.tight_layout()
-        plt.savefig("equipotentials.svg", transparent=True)
+        if save:
+            export("equipotentials")
         plt.show()

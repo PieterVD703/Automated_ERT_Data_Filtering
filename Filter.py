@@ -36,12 +36,12 @@ class Filtering:
 
         for meas_id in range(len(self.index)):
             data_column = data.iloc[:, meas_id]
-            nan_mask = np.isnan(data_column)  # Identify NaN positions
-            # Apply median filter only to non-NaN values
+            nan_mask = np.isnan(data_column)  #Nan posities vinden
+            #Filter enkel op NaN waarden
             filtered_values = medfilt(data_column[~nan_mask], kernel_size=window)
-            # Insert filtered values back, keeping NaNs in place
+            #gefilterde waarden terugplaatsen; NaN blijft io plek
             data_column[~nan_mask] = filtered_values
-            values_filtered[:, meas_id] = data_column  # Assign back
+            values_filtered[:, meas_id] = data_column  #terug assignen
 
         return values_filtered, self.dates
 
@@ -132,7 +132,7 @@ class Filtering:
         if butterworth is True:
             self.values, self.dates = self.butterworth()
             suffix += f"_butter{cutoff:.2f}μHz"
-        if export is True:
+        if export is True: #exporteren naar nieuwe csv
             fname = os.path.join(
                 path_to_plot,
                 f"data{self.index}{suffix}.csv"

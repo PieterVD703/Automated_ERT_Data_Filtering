@@ -1,6 +1,8 @@
 import numpy as np
 import pandas
-
+import os
+from settings.config import PATH_TO_PLOT
+import matplotlib.pyplot as plt
 def nan_helper(y):
     """Helper to handle indices and logical indices of NaNs. -> Numpy arrays
 
@@ -25,10 +27,10 @@ def big_number_removal(value):
     :param value:
     :return:
     """
-    if isinstance(value, str) and value.count('.') > 1:  # More than one period
+    if isinstance(value, str) and value.count('.') > 1:  # meer dan 1 plot
         print("Warning: incorrect values present")
-        return float('nan')  # Convert to NaN
-    return value  # Keep the rest unchanged
+        return float('nan')  # naar NaN omzetten
+    return value
 
 
 def count_selected_columns(index, total_columns):
@@ -44,11 +46,11 @@ def count_selected_columns(index, total_columns):
     """
     assert isinstance(total_columns, int), "invalid total column"
     if isinstance(index, int):
-        return 1  # Single column
+        return 1  #1 kolom
     elif isinstance(index, slice):
-        return len(range(*index.indices(total_columns)))  # Slice (range of columns)
+        return len(range(*index.indices(total_columns)))  #slice
     elif isinstance(index, list) or isinstance(index, tuple):
-        return len(index)  # List of columns
+        return len(index)  #lijst van kolommen
     elif isinstance(index, range):
         return len(index)
     else:
@@ -62,13 +64,13 @@ def shift(index):
     :return:
     """
     if isinstance(index, int):
-        return [index + 1]  # Shift single integer by +1
+        return [index + 1]  #shift index +1
     elif isinstance(index, range):
-        return list(range(index.start + 1, index.stop + 1, index.step))  # Shift range by +1
+        return list(range(index.start + 1, index.stop + 1, index.step))  #shift range met +1
     elif isinstance(index, slice):
-        return list(range(index.start + 1, index.stop + 1, index.step))  # Shift slice by +1
+        return list(range(index.start + 1, index.stop + 1, index.step))  #shift slice met +1
     elif isinstance(index, list):
-        return [i + 1 for i in index]  # Shift all elements in list by +1
+        return [i + 1 for i in index]  #shift alle elementen in lijst met +1
     else:
         raise AssertionError ("invalid index")
 
@@ -78,4 +80,11 @@ def standardise(data, index):
     else:
         return data
 
+def export(title, fig=None, dpi=300, extension="png"):
+    assert isinstance(extension, str) and isinstance(title, str), "gelieve een string waarde op te geven"
+    if fig is None:
+        fig = plt.gcf()
+    filename = f"{title}.{extension}"
+    fname = os.path.join(PATH_TO_PLOT, filename)
+    fig.savefig(fname, dpi=dpi)
 

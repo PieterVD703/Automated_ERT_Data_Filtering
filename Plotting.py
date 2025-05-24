@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import time
 from settings.config import BUTTERWORTH_PARAMS, WINDOW_LENGTH, PATH_TO_DATA, PATH_TO_PLOT
-from Help.Helper_functions import nan_helper, standardise, big_number_removal, shift
+from Help.Helper_functions import nan_helper, standardise, big_number_removal, shift, export
 import numpy as np
 import pandas
 import os
@@ -69,8 +69,7 @@ class Plotting:
         plt.grid(True)
         plt.legend(['raw', 'filtered'])
         if save:
-            fname = os.path.join(PATH_TO_PLOT, "moving median plot" + str(filtering_instance.window) + str(index) + '.' + extension)  # locatie en naam waar naartoe geschreven wordt
-            plt.savefig(fname, dpi=200)
+            export("moving median plot" + str(filtering_instance.window) + str(index), extension=extension)
         plt.show()
         plt.close()
 
@@ -172,12 +171,7 @@ class Plotting:
                 suffix += "_shifted"
             if residuals:
                 suffix += "_res"
-            fname = os.path.join(
-                PATH_TO_PLOT,
-                f"butterworth{index}{suffix}_{cutoff:.2f}μHz.{extension}"
-            )
-            # locatie en naam waar naartoe geschreven wordt
-            fig.savefig(fname, dpi=200)
+            export(f"butterworth{index}{suffix}_{cutoff:.2f}μHz", extension=extension)
         plt.show()
 
 
@@ -260,14 +254,7 @@ def butterworth_frequency_response(log=False, poles=False, save=False) -> np.nda
         suffix = ""
         if poles:
             suffix = "_wPoles"
-        fname = os.path.join(
-            PATH_TO_PLOT,
-            f"butterworth_frequency_response_{cutoff:.2f}μHz{suffix}.png"
-        )
-        # locatie en naam waar naartoe geschreven wordt
-        plt.savefig(fname, dpi=200)
-    plt.show()
-
+        export(f"butterworth_frequency_response_{cutoff:.2f}μHz{suffix}")
     return np.array([xf, yf])
 
 
@@ -279,7 +266,7 @@ if __name__ == "__main__": #zal uitgevoerd worden indien het vanuit deze file ge
     #plot_instance.plot_moving_median(extension = "svg", save=True)  # Call the method properly
     #plot_instance.plot_butterworth(path_to_plot=PATH_TO_PLOT)  # Call the method properly
     print("--- %s seconds for data ---" % (time.time() - start_time))
-    plot_instance.plot_butterworth(extension="svg", phase_shift=False, moving_window=True, interpolation=False, save=True, residuals=False, compare=True)
+    #plot_instance.plot_butterworth(extension="svg", phase_shift=False, moving_window=True, interpolation=False, save=True, residuals=False, compare=True)
 
 
 

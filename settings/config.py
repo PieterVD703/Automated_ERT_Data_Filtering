@@ -14,7 +14,7 @@ PATH_TO_PLOT = os.path.join(BASE_DIR, "Figuren")
 PATH_TO_PICKLE = os.path.join(BASE_DIR, "pickles")
 PATH_TO_INVERSION_OUTPUT = os.path.join(BASE_DIR, "inversion_output")
 
-#inversie parameters
+#inversie parameters, voor toekomst
 INVERSION_PARAMS = {
     "max_iterations": 1000,
     "tolerance": 1e-6,
@@ -41,6 +41,6 @@ BUTTERWORTH_PARAMS = {
 }
 
 # Pickle filename
-#pickling is het proces waarbij data wordt opgeslaan naar een file
+#pickling is het proces waarbij data wordt opgeslaan naar een file, toekomst
 PICKLE_NAME = "inversion_results.pkl"
 

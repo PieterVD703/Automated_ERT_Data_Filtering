@@ -2,10 +2,10 @@
 This repository provides a way to automatically filter en visualise data from Electrical Resistivity Tomography (ERT). The data has to be stored in a CSV format. This code was developed for an academic bachelor's project and aims to streamline the data processing.
 
 ## Features
--Automated filtering: ability to use a moving window median filter, and/or Butterworth filtering.
--Data visualisation: ability to generate plots to compare filter effects
--configurable global settings: the config.py file changes to filter paramaters globally
--modular design: the organisation of distinct modules and helper functions promotes readability and maintenance.
+- Automated filtering: ability to use a moving window median filter, and/or Butterworth filtering.
+- Data visualisation: ability to generate plots to compare filter effects
+- configurable global settings: the config.py file changes to filter paramaters globally
+- modular design: the organisation of distinct modules and helper functions promotes readability and maintenance.
 
 ## Structure
 ```

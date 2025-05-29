@@ -4,8 +4,8 @@ This repository provides a way to automatically filter en visualise data from El
 ## Features
 - Automated filtering: ability to use a moving window median filter, and/or Butterworth filtering.
 - Data visualisation: ability to generate plots to compare filter effects
-- configurable global settings: the config.py file changes to filter paramaters globally
-- modular design: the organisation of distinct modules and helper functions promotes readability and maintenance.
+- Configurable global settings: the config.py file changes to filter paramaters globally
+- Modular design: the organisation of distinct modules and helper functions promotes readability and maintenance.
 
 ## Structure
 ```
@@ -16,7 +16,7 @@ Automated_ERT_Data_Filtering/
 ├── settings/                    # Configuration files for filter parameters
 ├── data/                        # Directory to store input CSV data files
 ├── Figuren/                     # Output directory for generated figures
-├── Help/                        # Documentation and usage guides
+├── Help/                        # Helper functions
 └── README.md                    # Project overview and instructions
 
 ```

@@ -22,7 +22,7 @@ Automated_ERT_Data_Filtering/
 ```
 
 ## Prerequisites
-Ensure you haev Python 3.x and the following packages:
+Ensure you have Python 3.x and the following packages:
 ```
 pip install numpy pandas matplotlib scipy
 ```
